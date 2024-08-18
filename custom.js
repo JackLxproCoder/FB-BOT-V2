@@ -1,94 +1,89 @@
+const cron = require('node-cron');
+const logger = require('./utils/log');
+const axios = require("axios");
+const fs = require('fs-extra');
+const PREFIX = true;
+
 module.exports = async ({ api }) => {
-  const logger = require('./utils/log');
-  const cron = require('node-cron');
-  const fs = require('fs');
-  const yandeva = {
+  const config = {
     autoRestart: {
       status: true,
-      time: 40, //40 minutes
-      note: 'To avoid problems, enable periodic bot restarts'
+      time: 40,
+      note: 'To avoid problems, enable periodic bot restarts',
     },
-    accpetPending: {
-      status: false,
-      time: 30, //30 minutes
-      note: 'Approve waiting messages after a certain time'
-    }
-  }
-  function autoRestart(config) {
-    if (config.status) {
-      setInterval(async () => {
-        logger(`Start rebooting the system!`, "[ Auto Restart ]")
-        process.exit(1)
-      }, config.time * 60 * 1000)
-    }
-  }
-  function accpetPending(config) {
-    if (config.status) {
-      setInterval(async () => {
-        const list = [
-          ...(await api.getThreadList(1, null, ['PENDING'])),
-          ...(await api.getThreadList(1, null, ['OTHER']))
-        ];
-        if (list[0]) {
-          api.sendMessage('You have been approved for the queue. (This is an automated message)', list[0].threadID);
-        }
-      }, config.time * 60 * 1000)
-    }
-  }
-  autoRestart(yandeva.autoRestart)
-  accpetPending(yandeva.accpetPending)
-
-  cron.schedule('*/30 * * * *', () => {
-    api.getThreadList(25, null, ['INBOX'], async (err, data) => {
-      if (err) return console.error("Error [Thread List Cron]: " + err);
-      let i = 0;
-      let j = 0;
-
-      async function message(thread) {
-        try {
-          api.sendMessage(`Hello Members How are you today?\nKamustahin kayo ulit after 30 minutes`, thread.threadID, (err) => { if (err) return });
-        } catch (error) {
-          console.error("Error sending a message:", error);
-        }
+    greetings: [
+      {
+        cronTime: '0 5 * * *',
+        messages: [`Good morning! Have a great day ahead!`],
+      },
+      {
+        cronTime: '0 8 * * *',
+        messages: [`Hello Everyone Time Check 8:00 AM :>`],
+      },
+      {
+        cronTime: '0 10 * * *',
+        messages: [`Hello everyone! How's your day going?`],
+      },
+      {
+        cronTime: '0 12 * * *',
+        messages: [`Lunchtime reminder: Take a break and eat well!`],
+      },
+      {
+        cronTime: '0 14 * * *',
+        messages: [`Reminder: Don't forget your tasks for today!`],
+      },
+      {
+        cronTime: '0 18 * * *',
+        messages: [`Good evening! Relax and enjoy your evening.`],
+      },
+      {
+        cronTime: '0 20 * * *',
+        messages: [`Time to wind down. Have a peaceful evening.`],
+      },
+      {
+        cronTime: '0 22 * * *',
+        messages: [`Good night! Have a restful sleep.`],
       }
+    ]
+  };
 
-      while (j < 20 && i < data.length) {
-        if (data[i].isGroup && data[i].name != data[i].threadID) {
-          await message(data[i]);
-          j++;
-        }
-        i++;
-      }
+  config.greetings.forEach((greeting) => {
+    cron.schedule(greeting.cronTime, () => {
+      api.getThreadList(20, null, ['INBOX']).then((list) => {
+        list.forEach((thread) => {
+          if (thread.isGroup) {
+            api.sendMessage(greeting.messages[0], thread.threadID).catch((error) => {
+              console.log(`Error sending message: ${error}`, 'AutoGreet');
+            });
+          }
+        });
+      }).catch((error) => {
+        console.log(`Error getting thread list: ${error}`, 'AutoGreet');
+      });
+    }, {
+      scheduled: true,
+      timezone: "Asia/Manila"
     });
-  }, {
-    scheduled: true,
-    timezone: "Asia/Manila"
   });
 
-  cron.schedule('*/25 * * * *', () => {
-    api.getThreadList(25, null, ['INBOX'], async (err, data) => {
-      if (err) return console.error("Error [Thread List Cron]: " + err);
-      let i = 0;
-      let j = 0;
-
-      async function message(thread) {
-        try {
-          api.sendMessage(`› Hello🤗 How are you? (ᴗ˳ᴗ)`, thread.threadID, (err) => { if (err) return });
-        } catch (error) {
-          console.error("Error sending a message:", error);
-        }
-      }
-
-      while (j < 20 && i < data.length) {
-        if (data[i].isGroup && data[i].name != data[i].threadID) {
-          await message(data[i]);
-          j++;
-        }
-        i++;
-      }
+  if (config.autoRestart.status) {
+    cron.schedule(`*/${config.autoRestart.time} * * * *`, () => {
+      api.getThreadList(20, null, ['INBOX']).then((list) => {
+        list.forEach((thread) => {
+          if (thread.isGroup) {
+            // Send restart message
+            api.sendMessage("🔃 𝗥𝗲𝘀𝘁𝗮𝗿𝘁𝗶𝗻𝗴 𝗣𝗿𝗼𝗰𝗲𝘀𝘀\n━━━━━━━━━━━━━━━━━━\nBot is restarting...", thread.threadID).then(() => {
+              console.log(`Restart message sent to thread`, 'Auto Restart');
+            }).catch((error) => {
+              console.log(`Error sending restart message to thread ${error}`, 'Auto Restart');
+            });
+          }
+        });
+        console.log('Start rebooting the system!', 'Auto Restart');
+        process.exit(1);
+      }).catch((error) => {
+        console.log(`Error getting thread list for restart: ${error}`, 'Auto Restart');
+      });
     });
-  }, {
-    scheduled: true,
-    timezone: "Asia/Manila"
-  });
+  }
 };
