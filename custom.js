@@ -1,111 +1,94 @@
-const cron = require('node-cron');
-const logger = require('./utils/log');
-const axios = require("axios");
-const fs = require('fs-extra');
-const PREFIX = true;
-
-const randomMessages = [
-  "kamusta ang buhay?",
-  "Be Happy lang palagi",
-  "Hello There I'm still alive",
-  "Hello Everyone Be Respectful to others Thanks you",
-  "How are you today?",
-  "Hello",
-  "Hello gawa niyo?"
-];
-
-function randomMessage(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-function sendGreeting(api, messages) {
-  api.getThreadList(20, null, ['INBOX']).then((list) => {
-    list.forEach((thread) => {
-      if (thread.isGroup) {
-        api.sendMessage(randomMessage(messages), thread.threadID).catch((error) => {
-          logger(`Error sending message: ${error}`, 'AutoGreet');
-        });
-      }
-    });
-  }).catch((error) => {
-    logger(`Error getting thread list: ${error}`, 'AutoGreet');
-  });
-}
-
 module.exports = async ({ api }) => {
-  const minInterval = 5;
-  let lastMessageTime = 0;
-  let messagedThreads = new Set();
-
-  const config = {
+  const logger = require('./utils/log');
+  const cron = require('node-cron');
+  const fs = require('fs');
+  const yandeva = {
     autoRestart: {
       status: true,
-      time: 40,
-      note: 'To avoid problems, enable periodic bot restarts',
+      time: 40, //40 minutes
+      note: 'To avoid problems, enable periodic bot restarts'
     },
-    acceptPending: {
+    accpetPending: {
       status: false,
-      time: 30,
-      note: 'Approve waiting messages after a certain time',
-    },
-    greetings: [
-      {
-        cronTime: '0 5 * * *', // At 05:00 AM
-        messages: [`Good morning! Have a great day ahead!`],
-      },
-      {
-        cronTime: '0 8 * * *', // At 08:00 AM
-        messages: [`Life update:\nMiss ko na sya`],
-      },
-      {
-        cronTime: '0 3 * * *', // At 03:00 AM
-        messages: [`Life update:\nNangungulila sa kanya`],
-      },
-      {
-        cronTime: '0 11 * * *', // At 11:00 AM
-        messages: [`Good afternoon! Take a break and stay hydrated!`],
-      },
-      {
-        cronTime: '0 22 * * *', // At 10:00 PM
-        messages: [`Good night! Ensure a restful sleep for a productive day tomorrow.`],
-      },
-    ]
-  };
+      time: 30, //30 minutes
+      note: 'Approve waiting messages after a certain time'
+    }
+  }
+  function autoRestart(config) {
+    if (config.status) {
+      setInterval(async () => {
+        logger(`Start rebooting the system!`, "[ Auto Restart ]")
+        process.exit(1)
+      }, config.time * 60 * 1000)
+    }
+  }
+  function accpetPending(config) {
+    if (config.status) {
+      setInterval(async () => {
+        const list = [
+          ...(await api.getThreadList(1, null, ['PENDING'])),
+          ...(await api.getThreadList(1, null, ['OTHER']))
+        ];
+        if (list[0]) {
+          api.sendMessage('You have been approved for the queue. (This is an automated message)', list[0].threadID);
+        }
+      }, config.time * 60 * 1000)
+    }
+  }
+  autoRestart(yandeva.autoRestart)
+  accpetPending(yandeva.accpetPending)
 
-  config.greetings.forEach((greeting) => {
-    cron.schedule(greeting.cronTime, () => {
-      sendGreeting(api, greeting.messages);
-    }, {
-      scheduled: true,
-      timezone: "Asia/Manila"
+  cron.schedule('*/30 * * * *', () => {
+    api.getThreadList(25, null, ['INBOX'], async (err, data) => {
+      if (err) return console.error("Error [Thread List Cron]: " + err);
+      let i = 0;
+      let j = 0;
+
+      async function message(thread) {
+        try {
+          api.sendMessage(`Hello Members How are you today?\nKamustahin kayo ulit after 30 minutes`, thread.threadID, (err) => { if (err) return });
+        } catch (error) {
+          console.error("Error sending a message:", error);
+        }
+      }
+
+      while (j < 20 && i < data.length) {
+        if (data[i].isGroup && data[i].name != data[i].threadID) {
+          await message(data[i]);
+          j++;
+        }
+        i++;
+      }
     });
-  });
-
-
-  cron.schedule('*/50 * * * *', () => {
-    sendGreeting(api, randomMessages);
   }, {
     scheduled: true,
     timezone: "Asia/Manila"
   });
 
-  if (config.autoRestart.status) {
-    cron.schedule(`*/${config.autoRestart.time} * * * *`, () => {
-      logger('Start rebooting the system!', 'Auto Restart');
-      process.exit(1);
-    });
-  }
+  cron.schedule('*/25 * * * *', () => {
+    api.getThreadList(25, null, ['INBOX'], async (err, data) => {
+      if (err) return console.error("Error [Thread List Cron]: " + err);
+      let i = 0;
+      let j = 0;
 
-  // Accept pending messages logic
-  if (config.acceptPending.status) {
-    cron.schedule(`*/${config.acceptPending.time} * * * *`, async () => {
-      const list = [
-        ...(await api.getThreadList(1, null, ['PENDING'])),
-        ...(await api.getThreadList(1, null, ['OTHER'])),
-      ];
-      if (list[0]) {
-        api.sendMessage('Hello mga Pogi Musta kayo?', list[0].threadID);
+      async function message(thread) {
+        try {
+          api.sendMessage(`› Hello🤗 How are you? (ᴗ˳ᴗ)`, thread.threadID, (err) => { if (err) return });
+        } catch (error) {
+          console.error("Error sending a message:", error);
+        }
+      }
+
+      while (j < 20 && i < data.length) {
+        if (data[i].isGroup && data[i].name != data[i].threadID) {
+          await message(data[i]);
+          j++;
+        }
+        i++;
       }
     });
-  }
+  }, {
+    scheduled: true,
+    timezone: "Asia/Manila"
+  });
 };
