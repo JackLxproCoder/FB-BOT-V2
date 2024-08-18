@@ -48,13 +48,12 @@ module.exports.run = async function ({ api, event, args }) {
             if (attachment.type === "photo") {
                 const imageURL = attachment.url;
 
-                const geminiUrl = `https://joshweb.click/gemini?prompt=${encodeURIComponent(args.join(" "))}&url=${encodeURIComponent(imageURL)}`;
+                const geminiUrl = `https://joncll.serv00.net/chat.php?ask=${encodeURIComponent(args.join(" "))}&imgurl=${encodeURIComponent(imageURL)}`;
                 const response = await axios.get(geminiUrl);
+                const { vision } = response.data;
 
-                const caption = response.data.gemini;
-
-                if (caption) {
-                    return api.editMessage(`𝗚𝗲𝗺𝗶𝗻𝗶 𝗩𝗶𝘀𝗶𝗼𝗻 𝗣𝗿𝗼 𝗜𝗺𝗮𝗴𝗲 𝗥𝗲𝗰𝗼𝗴𝗻𝗶𝘁𝗶𝗼𝗻 \n━━━━━━━━━━━━━━━━━━\n${caption}\n━━━━━━━━━━━━━━━━━━\n`, lad.messageID, event.threadID, event.messageID);
+                if (vision) {
+                    return api.editMessage(`𝗚𝗲𝗺𝗶𝗻𝗶 𝗩𝗶𝘀𝗶𝗼𝗻 𝗜𝗺𝗮𝗴𝗲 𝗥𝗲𝗰𝗼𝗴𝗻𝗶𝘁𝗶𝗼𝗻 \n━━━━━━━━━━━━━━━━━━\n${vision}\n━━━━━━━━━━━━━━━━━━\n`, lad.messageID, event.threadID, event.messageID);
                 } else {
                     return api.sendMessage("🤖 Failed to recognize the image.", threadID, messageID);
                 }
