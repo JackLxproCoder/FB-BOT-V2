@@ -12,7 +12,7 @@
 
 I'm Jack known as Jack Editz I'm an Editor and Musician and Music Producer and I'm also a Programmer and Cyber ​​Security
 
-My hobbies Orchesta, Reading, and Walking I'm Friendly
+Interest: Reading, Writing, Arm  Wrestling
 
 ## Thank you for using this Bot!
 <img draggable="false" src="https://i.imgur.com/9tIFmUS.gif" alt="Naruto">
