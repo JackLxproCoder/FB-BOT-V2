@@ -40,8 +40,8 @@ module.exports.run = async function ({ api, event, args }) {
         const lad = await api.sendMessage("🔎 Searching for an answer. Please wait...", threadID, messageID);
         const response = await axios.get(`https://kaiz-apis.gleeze.com/api/gpt4o-mini?ask=${encodeURIComponent(args.join(" "))}`);
 
-        if (response.data.response) {
-            const responseMessage = `𝗚𝗣𝟰𝗼-𝗠𝗶𝗻𝗶\n━━━━━━━━━━━━━━━━━━\n${response.data.response}\n━━━━━━━━━━━━━━━━━━\n`;
+        if (data.response) {
+            const responseMessage = `𝗚𝗣𝟰𝗼-𝗠𝗶𝗻𝗶\n━━━━━━━━━━━━━━━━━━\n${data.response}\n━━━━━━━━━━━━━━━━━━\n`;
             api.editMessage(responseMessage, lad.messageID, threadID, messageID);
         } else {
             api.sendMessage("An error occurred while processing your request.", threadID, messageID);
