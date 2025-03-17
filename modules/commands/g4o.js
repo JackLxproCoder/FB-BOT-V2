@@ -19,7 +19,7 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
         const lad = await api.sendMessage("🔎 Searching for an answer. Please wait...", threadID, messageID);
         const response = await axios.get(`https://kaiz-apis.gleeze.com/api/gpt4o-mini?ask=${encodeURIComponent(event.body)}`);
 
-        if (response.data.response) {
+        if (data.response) {
             const responseMessage = `𝗚𝗣𝗧𝟰𝗼-𝗠𝗶𝗻𝗶\n━━━━━━━━━━━━━━━━━━\n${response.data.response}\n━━━━━━━━━━━━━━━━━━\n`;
             api.editMessage(responseMessage, lad.messageID, threadID, messageID);
         } else {
