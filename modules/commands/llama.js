@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports.config = {
-    name: "gemini",
+    name: "Llama",
     hasPermssion: 0,
     version: "1.0.0",
     credits: "JackLxproCoder",
@@ -17,10 +17,10 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
 
     try {
         const lad = await api.sendMessage("🔎 Searching for an answer. Please wait...", threadID, messageID);
-        const response = await axios.get(`https://api.zetsu.xyz/gemini?prompt=${encodeURIComponent(event.body)}`);
+        const response = await axios.get(`https://kaiz-apis.gleeze.com/api/llama3-turbo?ask=${encodeURIComponent(event.body)}`);
 
-        if (response.data.gemini) {
-            const responseMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗜\n━━━━━━━━━━━━━━━━━━\n${response.data.gemini}\n━━━━━━━━━━━━━━━━━━\n`;
+        if (data.response) {
+            const responseMessage = `𝐋𝐥𝐚𝐦𝐚\n━━━━━━━━━━━━━━━━━━\n${data.response}\n━━━━━━━━━━━━━━━━━━\n`;
             api.editMessage(responseMessage, lad.messageID, threadID, messageID);
         } else {
             api.sendMessage("An error occurred while processing your request.", threadID, messageID);
@@ -38,10 +38,10 @@ module.exports.run = async function ({ api, event, args }) {
 
     try {
         const lad = await api.sendMessage("🔎 Searching for an answer. Please wait...", threadID, messageID);
-        const response = await axios.get(`https://api.zetsu.xyz/gemini?prompt=${encodeURIComponent(args.join(" "))}`);
+        const response = await axios.get(`https://kaiz-apis.gleeze.com/api/llama3-turbo?ask=${encodeURIComponent(args.join(" "))}`);
 
         if (response.data.gemini) {
-            const responseMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗜\n━━━━━━━━━━━━━━━━━━\n${response.data.gemini}\n━━━━━━━━━━━━━━━━━━\n`;
+            const responseMessage = `𝐋𝐥𝐚𝐦𝐚\n━━━━━━━━━━━━━━━━━━\n${data.response}\n━━━━━━━━━━━━━━━━━━\n`;
             api.editMessage(responseMessage, lad.messageID, threadID, messageID);
         } else {
             api.sendMessage("An error occurred while processing your request.", threadID, messageID);
