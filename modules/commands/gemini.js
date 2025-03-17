@@ -4,7 +4,7 @@ module.exports.config = {
     name: "gemini",
     hasPermssion: 0,
     version: "1.0.0",
-    credits: "Jonell Magallanes",
+    credits: "JackLxproCoder",
     description: "EDUCATIONAL",
     usePrefix: false,
     commandCategory: "AI",
@@ -17,10 +17,10 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
 
     try {
         const lad = await api.sendMessage("🔎 Searching for an answer. Please wait...", threadID, messageID);
-        const response = await axios.get(`https://jonellccprojectapis10.adaptable.app/api/gen?ask=${encodeURIComponent(event.body)}`);
+        const response = await axios.get(`https://api.zetsu.xyz/gemini?prompt=${encodeURIComponent(event.body)}`);
 
-        if (response.data.result) {
-            const responseMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗜\n━━━━━━━━━━━━━━━━━━\n${response.data.result}\n━━━━━━━━━━━━━━━━━━\n`;
+        if (response.data.gemini) {
+            const responseMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗜\n━━━━━━━━━━━━━━━━━━\n${response.data.gemini}\n━━━━━━━━━━━━━━━━━━\n`;
             api.editMessage(responseMessage, lad.messageID, threadID, messageID);
         } else {
             api.sendMessage("An error occurred while processing your request.", threadID, messageID);
@@ -34,14 +34,14 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
 module.exports.run = async function ({ api, event, args }) {
     const { messageID, threadID } = event;
 
-    if (!args[0]) return api.sendMessage("Please provide your question or request.\n\nExample: Gemini AI write a story about a young girl who discovers a magical portal in her backyard.", threadID, messageID);
+    if (!args[0]) return api.sendMessage("Please provide your question or request.\n\nExample: Gemini write a story about a young girl who discovers a magical portal in her backyard.", threadID, messageID);
 
     try {
         const lad = await api.sendMessage("🔎 Searching for an answer. Please wait...", threadID, messageID);
-        const response = await axios.get(`https://jonellccprojectapis10.adaptable.app/api/gen?ask=${encodeURIComponent(args.join(" "))}`);
+        const response = await axios.get(`https://api.zetsu.xyz/gemini?prompt=${encodeURIComponent(args.join(" "))}`);
 
-        if (response.data.result) {
-            const responseMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗜\n━━━━━━━━━━━━━━━━━━\n${response.data.result}\n━━━━━━━━━━━━━━━━━━\n`;
+        if (response.data.gemini) {
+            const responseMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗜\n━━━━━━━━━━━━━━━━━━\n${response.data.gemini}\n━━━━━━━━━━━━━━━━━━\n`;
             api.editMessage(responseMessage, lad.messageID, threadID, messageID);
         } else {
             api.sendMessage("An error occurred while processing your request.", threadID, messageID);
